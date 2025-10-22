@@ -634,11 +634,9 @@ HTMLWidgets.widget({
           return;
         }
 
-        // // Load Allmaps if not already loaded
-        // if (typeof Allmaps === "undefined") {
-        //   const script = document.createElement('script');
-        //   script.src = "https://cdn.jsdelivr.net/npm/@allmaps/maplibre/dist/bundled/allmaps-maplibre-4.0.umd.js";
-        //   document.head.appendChild(script);
+        // // Ensure Allmaps is loaded
+        // if (typeof window.Allmaps === "undefined") {
+        //   throw new Error("Allmaps MapLibre library is not loaded. Please ensure the library is included in your dependencies.");
         // }
 
         let protocol = new pmtiles.Protocol({ metadata: true });
@@ -1081,26 +1079,36 @@ HTMLWidgets.widget({
             map.setFog(x.fog);
           }
 
-          // if (x.warped_map_layer) {
-          //   warpedlayer = new WarpedMapLayer(x.warped_map_layer.id);
-          //   map.addLayer(warpedlayer);
-          //   warpedlayer.addGeoreferenceAnnotationByUrl(x.warped_map_layer.url);
-          // }
-
           // Add warped map layer if provided
           if (x.warped_map_layer) {
-            warpedMapLayer = new WarpedMapLayer(x.warped_map_layer.id, {
+            // Import Allmaps MapLibre library if not already loaded
+            if (typeof window.Allmaps === 'undefined') {
+              console.error('Allmaps MapLibre library not loaded. Please make sure to include the library.');
+              return;
+            }
+
+            // Create the warped map layer
+            warpedMapLayer = new window.Allmaps.WarpedMapLayer({
+              id: x.warped_map_layer.id,
               ...x.warped_map_layer.options
             });
-            map.addLayer(warpedMapLayer);
+
+            // Add layer to the map
+            map.addLayer(warpedMapLayer, x.warped_map_layer.before_id);
 
             // Add annotations if provided
             if (x.warped_map_layer.url) {
-              x.warped_map_layer.url.forEach(annotation => {
-                if (typeof annotation === 'string') {
-                  warpedMapLayer.addGeoreferenceAnnotationByUrl(annotation);
-                } else {
-                  warpedMapLayer.addGeoreferenceAnnotation(annotation);
+              const urls = Array.isArray(x.warped_map_layer.url) ? x.warped_map_layer.url : [x.warped_map_layer.url];
+              
+              urls.forEach(async (annotation) => {
+                try {
+                  if (typeof annotation === 'string') {
+                    await warpedMapLayer.addGeoreferenceAnnotationByUrl(annotation);
+                  } else {
+                    await warpedMapLayer.addGeoreferenceAnnotation(annotation);
+                  }
+                } catch (error) {
+                  console.error('Error adding georeference annotation:', error);
                 }
               });
             }
