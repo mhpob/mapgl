@@ -1080,7 +1080,7 @@ HTMLWidgets.widget({
           }
 
           // Add warped map layer if provided
-          if (x.warped_map_layer) {
+          if (x.georeferenced_map) {
             // Import Allmaps MapLibre library if not already loaded
             if (typeof window.Allmaps === 'undefined') {
               console.error('Allmaps MapLibre library not loaded. Please make sure to include the library.');
@@ -1089,29 +1089,25 @@ HTMLWidgets.widget({
 
             // Create the warped map layer
             warpedMapLayer = new window.Allmaps.WarpedMapLayer({
-              id: x.warped_map_layer.id,
-              ...x.warped_map_layer.options
+              id: x.georeferenced_map.id,
+              ...x.georeferenced_map.options
             });
 
             // Add layer to the map
-            map.addLayer(warpedMapLayer, x.warped_map_layer.before_id);
+            map.addLayer(warpedMapLayer, x.georeferenced_map.before_id);
 
             // Add annotations if provided
-            if (x.warped_map_layer.url) {
-              const urls = Array.isArray(x.warped_map_layer.url) ? x.warped_map_layer.url : [x.warped_map_layer.url];
-              
-              urls.forEach(async (annotation) => {
-                try {
-                  if (typeof annotation === 'string') {
-                    await warpedMapLayer.addGeoreferenceAnnotationByUrl(annotation);
-                  } else {
-                    await warpedMapLayer.addGeoreferenceAnnotation(annotation);
-                  }
-                } catch (error) {
-                  console.error('Error adding georeference annotation:', error);
+            x.georeferenced_map.url.forEach(async (annotation) => {
+              try {
+                if (typeof annotation === 'string') {
+                  await warpedMapLayer.addGeoreferenceAnnotationByUrl(annotation);
+                } else {
+                  await warpedMapLayer.addGeoreferenceAnnotation(annotation);
                 }
-              });
-            }
+              } catch (error) {
+                console.error('Error adding georeference annotation:', error);
+              }
+            });
           }
 
           if (x.fitBounds) {

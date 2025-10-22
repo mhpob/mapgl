@@ -25,36 +25,33 @@
 #' \dontrun{
 #' library(mapgl)
 #'
-#' # Create a map
-#' map <- maplibre() %>%
-#'   set_view(lng = 4.9, lat = 52.4, zoom = 10)
-#'
 #' # Add a warped historical map
-# ' map %>% add_allmaps_layer(
-# '   id = "old-manhattan",
-# '   url = "https://annotations.allmaps.org/images/d180902cb93d5bf2",
-# '   options = list(
-# '     opacity = 0.7,
-# '     minzoom = 8,
-# '     maxzoom = 18
-# '   )
-# ' )
+#' maplibre(center= c(-73.95, 40.75), zoom = 10) |>
+#'  add_georeferenced_map(
+#'     id = "old-manhattan",
+#'    url = "https://annotations.allmaps.org/images/d180902cb93d5bf2",
+#'    options = list(
+#'       opacity = 0.7,
+#'       minzoom = 8,
+#'       maxzoom = 18
+#'    )
+#'  )
 #' }
-add_allmaps_layer <- function(
+add_georeferenced_map <- function(
   map,
   id,
   url,
   options = NULL
 ) {
   # Create the warped map layer configuration
-  warped_map_layer <- list(
+  georeferenced_map <- list(
     id = id,
     options = options,
     url = if (is.list(url)) url else list(url)
   )
 
   # Add the warped map layer to the map's configuration
-  map$x$warped_map_layer <- warped_map_layer
+  map$x$georeferenced_map <- georeferenced_map
 
   return(map)
 }
