@@ -625,6 +625,7 @@ HTMLWidgets.widget({
   factory: function (el, width, height) {
     let map;
     let draw;
+    let warpedMapLayer;
 
     return {
       renderValue: function (x) {
@@ -632,6 +633,13 @@ HTMLWidgets.widget({
           console.error("Maplibre GL JS is not loaded.");
           return;
         }
+
+        // // Load Allmaps if not already loaded
+        // if (typeof Allmaps === "undefined") {
+        //   const script = document.createElement('script');
+        //   script.src = "https://cdn.jsdelivr.net/npm/@allmaps/maplibre/dist/bundled/allmaps-maplibre-4.0.umd.js";
+        //   document.head.appendChild(script);
+        // }
 
         let protocol = new pmtiles.Protocol({ metadata: true });
         maplibregl.addProtocol("pmtiles", protocol.tile);
@@ -1071,6 +1079,31 @@ HTMLWidgets.widget({
           // Set fog
           if (x.fog) {
             map.setFog(x.fog);
+          }
+
+          // if (x.warped_map_layer) {
+          //   warpedlayer = new WarpedMapLayer(x.warped_map_layer.id);
+          //   map.addLayer(warpedlayer);
+          //   warpedlayer.addGeoreferenceAnnotationByUrl(x.warped_map_layer.url);
+          // }
+
+          // Add warped map layer if provided
+          if (x.warped_map_layer) {
+            warpedMapLayer = new WarpedMapLayer(x.warped_map_layer.id, {
+              ...x.warped_map_layer.options
+            });
+            map.addLayer(warpedMapLayer);
+
+            // Add annotations if provided
+            if (x.warped_map_layer.url) {
+              x.warped_map_layer.url.forEach(annotation => {
+                if (typeof annotation === 'string') {
+                  warpedMapLayer.addGeoreferenceAnnotationByUrl(annotation);
+                } else {
+                  warpedMapLayer.addGeoreferenceAnnotation(annotation);
+                }
+              });
+            }
           }
 
           if (x.fitBounds) {
@@ -2202,6 +2235,10 @@ HTMLWidgets.widget({
             features: [],
           }
         );
+      },
+
+      getWarpedMapLayer: function() {
+        return warpedMapLayer;
       },
 
       resize: function (width, height) {
