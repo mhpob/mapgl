@@ -28,7 +28,7 @@
 #' # Add a warped historical map
 #' maplibre(center= c(-73.95, 40.75), zoom = 10) |>
 #'  add_georeferenced_map(
-#'     id = "old-manhattan",
+#'    id = "old-manhattan",
 #'    url = "https://annotations.allmaps.org/images/d180902cb93d5bf2",
 #'    options = list(
 #'       opacity = 0.7,
@@ -39,15 +39,25 @@
 #' }
 add_georeferenced_map <- function(
   map,
-  id,
+  id = NULL,
   url,
-  options = NULL
+  opacity = NULL,
+  colorize = NULL,
+  remove_color = list(
+    hex_color = NULL,
+    threshold = NULL,
+    hardness = NULL
+  ),
+  saturation = NULL
 ) {
   # Create the warped map layer configuration
   georeferenced_map <- list(
     id = id,
-    options = options,
-    url = if (is.list(url)) url else list(url)
+    url = if (is.list(url)) url else list(url),
+    opacity = opacity,
+    colorize = colorize,
+    remove_color = remove_color,
+    saturation = saturation
   )
 
   # Add the warped map layer to the map's configuration

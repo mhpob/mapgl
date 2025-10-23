@@ -1089,8 +1089,7 @@ HTMLWidgets.widget({
 
             // Create the warped map layer
             warpedMapLayer = new window.Allmaps.WarpedMapLayer({
-              id: x.georeferenced_map.id,
-              ...x.georeferenced_map.options
+              id: x.georeferenced_map.id || {},
             });
 
             // Add layer to the map
@@ -1108,6 +1107,25 @@ HTMLWidgets.widget({
                 console.error('Error adding georeference annotation:', error);
               }
             });
+
+            if (x.georeferenced_map.opacity) {
+              warpedMapLayer.setOpacity(x.georeferenced_map.opacity);
+            }
+            if (x.georeferenced_map.colorize) {
+              warpedMapLayer.setColorize(x.georeferenced_map.colorize);
+            }
+            if (x.georeferenced_map.remove_color) {
+              warpedMapLayer.setRemoveColor(
+                {
+                  hexColor: x.georeferenced_map.remove_color.hex_color || {},
+                  threshold: x.georeferenced_map.remove_color.threshold || {},
+                  hardness: x.georeferenced_map.remove_color.hardness || {}
+                }
+              );
+            }
+            if (x.georeferenced_map.saturation) {
+              warpedMapLayer.setSaturation(x.georeferenced_map.saturation);
+            }
           }
 
           if (x.fitBounds) {
