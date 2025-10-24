@@ -6,8 +6,8 @@ dependencies:
       - "maplibre-gl.js"
     stylesheet:
       - "maplibre-gl.css"
-  - name: allmaps-maplibre
-    version: "4.0.0"
+  - name: allmaps
+    version: "1.0.034"
     src: "htmlwidgets/lib/allmaps"
     script:
       - "allmaps-maplibre-4.0.umd.js"

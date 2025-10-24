@@ -1041,6 +1041,54 @@ HTMLWidgets.widget({
             });
           }
 
+          // Add warped map layer if provided
+          if (x.georeferenced_map) {
+            // Import Allmaps MapLibre library if not already loaded
+            if (typeof Allmaps === 'undefined') {
+              console.error('Allmaps MapLibre library not loaded. Please make sure to include the library.');
+              return;
+            }
+
+            // Create the warped map layer
+            warpedMapLayer = new Allmaps.WarpedMapLayer({
+              id: x.georeferenced_map.id || undefined,
+            });
+
+            // Add layer to the map
+            map.addLayer(warpedMapLayer, x.georeferenced_map.before_id);
+
+            // Add annotations if provided
+            warpedMapLayer.addGeoreferenceAnnotationByUrl(x.georeferenced_map.url);
+            // x.georeferenced_map.url.forEach(async (annotation) => {
+            //   try {
+            //     await warpedMapLayer.addGeoreferenceAnnotationByUrl(annotation);
+            //   } catch (error) {
+            //     console.error('Error adding georeference annotation:', error);
+            //   }
+            // });
+
+            if (x.georeferenced_map.opacity || 
+                  x.georeferenced_map.opacity === 0) {
+              warpedMapLayer.setOpacity(x.georeferenced_map.opacity);
+            }
+            if (x.georeferenced_map.colorize) {
+              warpedMapLayer.setColorize(x.georeferenced_map.colorize);
+            }
+            if (x.georeferenced_map.remove_color) {
+              warpedMapLayer.setRemoveColor(
+                {
+                  hexColor: x.georeferenced_map.remove_color.hex_color,
+                  threshold: x.georeferenced_map.remove_color.threshold,
+                  hardness: x.georeferenced_map.remove_color.hardness
+                }
+              );
+            }
+            if (x.georeferenced_map.saturation || 
+                  x.georeferenced_map.saturation === 0) {
+              warpedMapLayer.setSaturation(x.georeferenced_map.saturation);
+            }
+          }
+
           // Add layers if provided
           if (x.layers) {
             x.layers.forEach((layer) => add_my_layers(layer));
@@ -1077,55 +1125,6 @@ HTMLWidgets.widget({
           // Set fog
           if (x.fog) {
             map.setFog(x.fog);
-          }
-
-          // Add warped map layer if provided
-          if (x.georeferenced_map) {
-            // Import Allmaps MapLibre library if not already loaded
-            if (typeof window.Allmaps === 'undefined') {
-              console.error('Allmaps MapLibre library not loaded. Please make sure to include the library.');
-              return;
-            }
-
-            // Create the warped map layer
-            warpedMapLayer = new window.Allmaps.WarpedMapLayer({
-              id: x.georeferenced_map.id || {},
-            });
-
-            // Add layer to the map
-            map.addLayer(warpedMapLayer, x.georeferenced_map.before_id);
-
-            // Add annotations if provided
-            x.georeferenced_map.url.forEach(async (annotation) => {
-              try {
-                if (typeof annotation === 'string') {
-                  await warpedMapLayer.addGeoreferenceAnnotationByUrl(annotation);
-                } else {
-                  await warpedMapLayer.addGeoreferenceAnnotation(annotation);
-                }
-              } catch (error) {
-                console.error('Error adding georeference annotation:', error);
-              }
-            });
-
-            if (x.georeferenced_map.opacity) {
-              warpedMapLayer.setOpacity(x.georeferenced_map.opacity);
-            }
-            if (x.georeferenced_map.colorize) {
-              warpedMapLayer.setColorize(x.georeferenced_map.colorize);
-            }
-            if (x.georeferenced_map.remove_color) {
-              warpedMapLayer.setRemoveColor(
-                {
-                  hexColor: x.georeferenced_map.remove_color.hex_color || {},
-                  threshold: x.georeferenced_map.remove_color.threshold || {},
-                  hardness: x.georeferenced_map.remove_color.hardness || {}
-                }
-              );
-            }
-            if (x.georeferenced_map.saturation) {
-              warpedMapLayer.setSaturation(x.georeferenced_map.saturation);
-            }
           }
 
           if (x.fitBounds) {
