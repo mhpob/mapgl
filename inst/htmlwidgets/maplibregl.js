@@ -617,6 +617,45 @@ function addSourceFeaturesToDraw(draw, sourceId, map) {
   }
 }
 
+function allmaps(map, georef_map){
+  // Import Allmaps MapLibre library if not already loaded
+  if (typeof Allmaps === 'undefined') {
+    console.error('Allmaps MapLibre library not loaded. Please make sure to include the library.');
+    return;
+  }
+
+  // Create the warped map layer
+  const warpedMapLayer = new Allmaps.WarpedMapLayer({id: georef_map.id});
+
+  // // Add layer to the map
+  map.addLayer(warpedMapLayer, georef_map.before_id);
+
+  // // Add annotation to layer
+  warpedMapLayer.addGeoreferenceAnnotationByUrl(georef_map.url);
+
+  if (georef_map.opacity || 
+      georef_map.opacity === 0) {
+    warpedMapLayer.setOpacity(georef_map.opacity);
+  }
+  if (georef_map.colorize) {
+    warpedMapLayer.setColorize(georef_map.colorize);
+  }
+  if (georef_map.remove_color) {
+    warpedMapLayer.setRemoveColor(
+      {
+        hexColor: georef_map.remove_color.hex_color,
+        threshold: georef_map.remove_color.threshold,
+        hardness: georef_map.remove_color.hardness
+      }
+    );
+  }
+  if (georef_map.saturation || 
+        georef_map.saturation === 0) {
+    warpedMapLayer.setSaturation(georef_map.saturation);
+  }
+
+}  
+
 HTMLWidgets.widget({
   name: "maplibregl",
 
@@ -625,7 +664,6 @@ HTMLWidgets.widget({
   factory: function (el, width, height) {
     let map;
     let draw;
-    let warpedMapLayer;
 
     return {
       renderValue: function (x) {
@@ -1043,50 +1081,7 @@ HTMLWidgets.widget({
 
           // Add warped map layer if provided
           if (x.georeferenced_map) {
-            // Import Allmaps MapLibre library if not already loaded
-            if (typeof Allmaps === 'undefined') {
-              console.error('Allmaps MapLibre library not loaded. Please make sure to include the library.');
-              return;
-            }
-
-            // Create the warped map layer
-            warpedMapLayer = new Allmaps.WarpedMapLayer({
-              id: x.georeferenced_map.id || undefined,
-            });
-
-            // Add layer to the map
-            map.addLayer(warpedMapLayer, x.georeferenced_map.before_id);
-
-            // Add annotations if provided
-            warpedMapLayer.addGeoreferenceAnnotationByUrl(x.georeferenced_map.url);
-            // x.georeferenced_map.url.forEach(async (annotation) => {
-            //   try {
-            //     await warpedMapLayer.addGeoreferenceAnnotationByUrl(annotation);
-            //   } catch (error) {
-            //     console.error('Error adding georeference annotation:', error);
-            //   }
-            // });
-
-            if (x.georeferenced_map.opacity || 
-                  x.georeferenced_map.opacity === 0) {
-              warpedMapLayer.setOpacity(x.georeferenced_map.opacity);
-            }
-            if (x.georeferenced_map.colorize) {
-              warpedMapLayer.setColorize(x.georeferenced_map.colorize);
-            }
-            if (x.georeferenced_map.remove_color) {
-              warpedMapLayer.setRemoveColor(
-                {
-                  hexColor: x.georeferenced_map.remove_color.hex_color,
-                  threshold: x.georeferenced_map.remove_color.threshold,
-                  hardness: x.georeferenced_map.remove_color.hardness
-                }
-              );
-            }
-            if (x.georeferenced_map.saturation || 
-                  x.georeferenced_map.saturation === 0) {
-              warpedMapLayer.setSaturation(x.georeferenced_map.saturation);
-            }
+              allmaps(map, x.georeferenced_map);            
           }
 
           // Add layers if provided

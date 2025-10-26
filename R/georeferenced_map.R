@@ -13,7 +13,7 @@
 #'  the warped map layer. If NULL, it will default to 1.
 #' @param colorize An optional colorization to apply to the map. Must be a hex code.
 #' @param remove_color An optional list containing options for color removal:
-#'   * `hex_color`: The color to remove (hex code)
+#'   * `color`: The hex code of the color to remove
 #'   * `threshold`: Numeric threshold for color removal (0-1)
 #'   * `hardness`: Hardness of the color removal effect (0-1)
 #' @param saturation An optional numeric between 0 and 1. Adjusts the saturation
@@ -49,7 +49,7 @@
 #'   add_georeferenced_map(
 #'     url = "https://annotations.allmaps.org/images/d180902cb93d5bf2",
 #'     remove_color = list(
-#'       hex_color = "#b7c3b8",
+#'       color = "#b7c3b8",
 #'       threshold = 0.3,
 #'       hardness = 0.5
 #'     ),
@@ -63,7 +63,7 @@ add_georeferenced_map <- function(
   opacity = NULL,
   colorize = NULL,
   remove_color = list(
-    hex_color = NULL,
+    color = NULL,
     threshold = NULL,
     hardness = NULL
   ),
@@ -71,17 +71,21 @@ add_georeferenced_map <- function(
   before_id = NULL
 ) {
   # Create the warped map layer configuration
-  georeferenced_map <- list(
+  georeferenced_map_config <- list(
     id = id,
     url = if (is.list(url)) url else list(url),
     opacity = opacity,
     colorize = colorize,
     remove_color = remove_color,
-    saturation = saturation
+    saturation = saturation,
+    before_id = before_id
   )
 
   # Add the warped map layer to the map's configuration
-  map$x$georeferenced_map <- georeferenced_map
+  map$x$georeferenced_map <- c(
+    map$x$georeferenced_map,
+    georeferenced_map_config
+  )
 
   return(map)
 }
