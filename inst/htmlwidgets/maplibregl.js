@@ -617,43 +617,39 @@ function addSourceFeaturesToDraw(draw, sourceId, map) {
   }
 }
 
-function allmaps(map, georef_map){
-  // Import Allmaps MapLibre library if not already loaded
-  if (typeof Allmaps === 'undefined') {
-    console.error('Allmaps MapLibre library not loaded. Please make sure to include the library.');
-    return;
-  }
+async function allmaps(map, georef_map){
+  // Create the warped map layers
+  let warpedMapLayers = georef_map.map(
+    item => new Allmaps.WarpedMapLayer(item.id)
+  );
+  
+  // Add layer to the map
+  for (let i = 0; i < georef_map.length; i++) {
+    map.addLayer(warpedMapLayers[i], georef_map[i].before_id);
+    await warpedMapLayers[i].addGeoreferenceAnnotationByUrl(georef_map[i].url);
 
-  // Create the warped map layer
-  const warpedMapLayer = new Allmaps.WarpedMapLayer({id: georef_map.id});
-
-  // // Add layer to the map
-  map.addLayer(warpedMapLayer, georef_map.before_id);
-
-  // // Add annotation to layer
-  warpedMapLayer.addGeoreferenceAnnotationByUrl(georef_map.url);
-
-  if (georef_map.opacity || 
-      georef_map.opacity === 0) {
-    warpedMapLayer.setOpacity(georef_map.opacity);
+    // Set optional properties if provided
+    if (georef_map[i].opacity || 
+        georef_map[i].opacity === 0) {
+      warpedMapLayers[i].setOpacity(georef_map[i].opacity);
+    }
+    if (georef_map[i].colorize) {
+      warpedMapLayers[i].setColorize(georef_map[i].colorize);
+    }
+    if (georef_map[i].remove_color) {
+      warpedMapLayers[i].setRemoveColor(
+        {
+          hexColor: georef_map[i].remove_color.color,
+          threshold: georef_map[i].remove_color.threshold,
+          hardness: georef_map[i].remove_color.hardness
+        }
+      );
+    }
+    if (georef_map[i].saturation || 
+          georef_map[i].saturation === 0) {
+      warpedMapLayers[i].setSaturation(georef_map[i].saturation);
+    }
   }
-  if (georef_map.colorize) {
-    warpedMapLayer.setColorize(georef_map.colorize);
-  }
-  if (georef_map.remove_color) {
-    warpedMapLayer.setRemoveColor(
-      {
-        hexColor: georef_map.remove_color.hex_color,
-        threshold: georef_map.remove_color.threshold,
-        hardness: georef_map.remove_color.hardness
-      }
-    );
-  }
-  if (georef_map.saturation || 
-        georef_map.saturation === 0) {
-    warpedMapLayer.setSaturation(georef_map.saturation);
-  }
-
 }  
 
 HTMLWidgets.widget({
@@ -671,11 +667,6 @@ HTMLWidgets.widget({
           console.error("Maplibre GL JS is not loaded.");
           return;
         }
-
-        // // Ensure Allmaps is loaded
-        // if (typeof window.Allmaps === "undefined") {
-        //   throw new Error("Allmaps MapLibre library is not loaded. Please ensure the library is included in your dependencies.");
-        // }
 
         let protocol = new pmtiles.Protocol({ metadata: true });
         maplibregl.addProtocol("pmtiles", protocol.tile);
@@ -1081,7 +1072,14 @@ HTMLWidgets.widget({
 
           // Add warped map layer if provided
           if (x.georeferenced_map) {
-              allmaps(map, x.georeferenced_map);            
+            // Import Allmaps MapLibre library if not already loaded
+            if (typeof Allmaps === 'undefined') {
+              console.error('Allmaps MapLibre library not loaded. Please make sure to include the library.');
+              return;
+            }
+
+            allmaps(map, x.georeferenced_map);
+
           }
 
           // Add layers if provided

@@ -72,20 +72,26 @@ add_georeferenced_map <- function(
 ) {
   # Create the warped map layer configuration
   georeferenced_map_config <- list(
-    id = id,
-    url = if (is.list(url)) url else list(url),
-    opacity = opacity,
-    colorize = colorize,
-    remove_color = remove_color,
-    saturation = saturation,
-    before_id = before_id
+    list(
+      id = id,
+      url = if (is.list(url)) url else list(url),
+      opacity = opacity,
+      colorize = colorize,
+      remove_color = remove_color,
+      saturation = saturation,
+      before_id = before_id
+    )
   )
 
   # Add the warped map layer to the map's configuration
-  map$x$georeferenced_map <- c(
-    map$x$georeferenced_map,
-    georeferenced_map_config
-  )
+  if (!is.null(map$x$georeferenced_map)) {
+    map$x$georeferenced_map <- c(
+      map$x$georeferenced_map,
+      georeferenced_map_config
+    )
+  } else {
+    map$x$georeferenced_map <- georeferenced_map_config
+  }
 
   return(map)
 }
