@@ -55,6 +55,12 @@ download.file(
   destfile = "inst/htmlwidgets/lib/maptiler-geocoding-control/maplibregl.umd.js"
 )
 download.file(
-    "https://unpkg.com/@maptiler/geocoding-control@2.1.7/style.css",
+  "https://unpkg.com/@maptiler/geocoding-control@2.1.7/style.css",
   destfile = "inst/htmlwidgets/lib/maptiler-geocoding-control/style.css"
+)
+
+# Allmaps Plugin:
+download.file(
+  "https://cdn.jsdelivr.net/npm/@allmaps/maplibre@1.0.0-beta.34/dist/bundled/allmaps-maplibre-4.0.umd.js",
+  destfile = "inst/htmlwidgets/lib/allmaps/allmaps-maplibre-4.0.umd.js"
 )
