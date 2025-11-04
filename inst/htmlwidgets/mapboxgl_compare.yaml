@@ -55,3 +55,9 @@ dependencies:
     src: "htmlwidgets/lib/mapbox-pmtiles"
     script:
       - "pmtiles-source-optimized-v2.js"
+  - name: allmaps
+    version: "1.0.034"
+    src: "htmlwidgets/lib/allmaps"
+    script:
+      - "allmaps-maplibre-4.0.umd.js"
+      - "add_georeferenced_maps.js"

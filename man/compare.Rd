@@ -121,7 +121,7 @@ server <- function(input, output, session) {
     right_proxy <- maplibre_compare_proxy("comparison", map_side = "after")
     set_style(right_proxy, carto_style("voyager"))
   })
-  
+
   # Example with custom swiper color
   output$comparison2 <- renderMaplibreCompare({
     compare(

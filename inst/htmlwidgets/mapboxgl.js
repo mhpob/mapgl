@@ -679,41 +679,6 @@ function addSourceFeaturesToDraw(draw, sourceId, map) {
   }
 }
 
-async function allmaps(map, georef_map){
-  // Create the warped map layers
-  let warpedMapLayers = georef_map.map(
-    item => new Allmaps.WarpedMapLayer(item.id)
-  );
-
-  // Add layer to the map
-  for (let i = 0; i < georef_map.length; i++) {
-    map.addLayer(warpedMapLayers[i], georef_map[i].before_id);
-    await warpedMapLayers[i].addGeoreferenceAnnotationByUrl(georef_map[i].url);
-
-    // Set optional properties if provided
-    if (georef_map[i].opacity || 
-        georef_map[i].opacity === 0) {
-      warpedMapLayers[i].setOpacity(georef_map[i].opacity);
-    }
-    if (georef_map[i].colorize) {
-      warpedMapLayers[i].setColorize(georef_map[i].colorize);
-    }
-    if (georef_map[i].remove_color) {
-      warpedMapLayers[i].setRemoveColor(
-        {
-          hexColor: georef_map[i].remove_color.color,
-          threshold: georef_map[i].remove_color.threshold,
-          hardness: georef_map[i].remove_color.hardness
-        }
-      );
-    }
-    if (georef_map[i].saturation || 
-          georef_map[i].saturation === 0) {
-      warpedMapLayers[i].setSaturation(georef_map[i].saturation);
-    }
-  }
-}
-
 HTMLWidgets.widget({
   name: "mapboxgl",
 
@@ -953,6 +918,11 @@ HTMLWidgets.widget({
             });
           }
 
+          // Add georeferenced map if provided
+          if (x.georeferenced_map) {
+            allmaps(map, x.georeferenced_map);
+          }
+
           // Add layers if provided
           if (x.layers) {
             x.layers.forEach(function (layer) {
@@ -1144,17 +1114,6 @@ HTMLWidgets.widget({
                 console.error("Failed to add layer: ", layer, e);
               }
             });
-          }
-
-          if (x.georeferenced_map) {
-            // Import Allmaps MapLibre library if not already loaded
-            if (typeof Allmaps === 'undefined') {
-              console.error('Allmaps MapLibre library not loaded. Please make sure to include the library.');
-              return;
-            }
-
-            allmaps(map, x.georeferenced_map);
-
           }
 
           // Apply setFilter if provided

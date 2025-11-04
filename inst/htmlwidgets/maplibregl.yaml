@@ -72,3 +72,4 @@ dependencies:
     src: "htmlwidgets/lib/allmaps"
     script:
       - "allmaps-maplibre-4.0.umd.js"
+      - "add_georeferenced_maps.js"

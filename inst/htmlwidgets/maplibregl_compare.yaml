@@ -65,3 +65,9 @@ dependencies:
       - "maplibregl.umd.js"
     stylesheet:
       - "style.css"
+  - name: allmaps
+    version: "1.0.034"
+    src: "htmlwidgets/lib/allmaps"
+    script:
+      - "allmaps-maplibre-4.0.umd.js"
+      - "add_georeferenced_maps.js"

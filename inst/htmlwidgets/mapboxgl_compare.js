@@ -2197,6 +2197,11 @@ HTMLWidgets.widget({
             });
           }
 
+          // Add georeferenced map if provided
+          if (mapData.georeferenced_map) {
+              allmaps(map, mapData.georeferenced_map);
+          }
+          
           // Add layers if provided
           if (mapData.layers) {
             mapData.layers.forEach(function (layer) {

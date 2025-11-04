@@ -91,7 +91,7 @@
 #'     right_proxy <- maplibre_compare_proxy("comparison", map_side = "after")
 #'     set_style(right_proxy, carto_style("voyager"))
 #'   })
-#'   
+#'
 #'   # Example with custom swiper color
 #'   output$comparison2 <- renderMaplibreCompare({
 #'     compare(
@@ -103,190 +103,196 @@
 #' }
 #' }
 compare <- function(
-    map1,
-    map2,
-    width = "100%",
-    height = NULL,
-    elementId = NULL,
-    mousemove = FALSE,
-    orientation = "vertical",
-    mode = "swipe",
-    swiper_color = NULL
+  map1,
+  map2,
+  width = "100%",
+  height = NULL,
+  elementId = NULL,
+  mousemove = FALSE,
+  orientation = "vertical",
+  mode = "swipe",
+  swiper_color = NULL
 ) {
-    if (!mode %in% c("swipe", "sync")) {
-        stop("Mode must be either 'swipe' or 'sync'.")
-    }
+  if (!mode %in% c("swipe", "sync")) {
+    stop("Mode must be either 'swipe' or 'sync'.")
+  }
 
-    if (inherits(map1, "mapboxgl") && inherits(map2, "mapboxgl")) {
-        compare.mapboxgl(
-            map1,
-            map2,
-            width,
-            height,
-            elementId,
-            mousemove,
-            orientation,
-            mode,
-            swiper_color
-        )
-    } else if (inherits(map1, "maplibregl") && inherits(map2, "maplibregl")) {
-        compare.maplibre(
-            map1,
-            map2,
-            width,
-            height,
-            elementId,
-            mousemove,
-            orientation,
-            mode,
-            swiper_color
-        )
-    } else {
-        stop("Both maps must be either mapboxgl or maplibregl objects.")
-    }
+  if (inherits(map1, "mapboxgl") && inherits(map2, "mapboxgl")) {
+    compare.mapboxgl(
+      map1,
+      map2,
+      width,
+      height,
+      elementId,
+      mousemove,
+      orientation,
+      mode,
+      swiper_color
+    )
+  } else if (inherits(map1, "maplibregl") && inherits(map2, "maplibregl")) {
+    compare.maplibre(
+      map1,
+      map2,
+      width,
+      height,
+      elementId,
+      mousemove,
+      orientation,
+      mode,
+      swiper_color
+    )
+  } else {
+    stop("Both maps must be either mapboxgl or maplibregl objects.")
+  }
 }
 
 # Mapbox GL comparison widget
 compare.mapboxgl <- function(
-    map1,
-    map2,
-    width,
-    height,
-    elementId,
-    mousemove,
-    orientation,
-    mode,
-    swiper_color = NULL
+  map1,
+  map2,
+  width,
+  height,
+  elementId,
+  mousemove,
+  orientation,
+  mode,
+  swiper_color = NULL
 ) {
-    if (is.null(elementId)) {
-        elementId <- paste0(
-            "compare-container-",
-            as.hexmode(sample(1:1000000, 1))
-        )
-    }
-
-    x <- list(
-        map1 = map1$x,
-        map2 = map2$x,
-        elementId = elementId,
-        mousemove = mousemove,
-        orientation = orientation,
-        mode = mode,
-        swiper_color = swiper_color
+  if (is.null(elementId)) {
+    elementId <- paste0(
+      "compare-container-",
+      as.hexmode(sample(1:1000000, 1))
     )
+  }
 
-    control_css <- htmltools::htmlDependency(
-        name = "layers-control",
-        version = "1.0.0",
-        src = c(file = system.file("htmlwidgets/styles", package = "mapgl")),
-        stylesheet = "layers-control.css"
-    )
+  x <- list(
+    map1 = map1$x,
+    map2 = map2$x,
+    elementId = elementId,
+    mousemove = mousemove,
+    orientation = orientation,
+    mode = mode,
+    swiper_color = swiper_color
+  )
 
-    widget <- htmlwidgets::createWidget(
-        name = "mapboxgl_compare",
-        x,
-        width = width,
-        height = height,
-        package = "mapgl",
-        dependencies = list(control_css),
-        elementId = if (is.null(shiny::getDefaultReactiveDomain()))
-            elementId else NULL,
-        sizingPolicy = htmlwidgets::sizingPolicy(
-            viewer.suppress = FALSE,
-            browser.fill = TRUE,
-            viewer.fill = TRUE,
-            knitr.figure = TRUE,
-            padding = 0,
-            knitr.defaultHeight = "500px",
-            viewer.defaultHeight = "100vh",
-            browser.defaultHeight = "100vh"
-        )
+  control_css <- htmltools::htmlDependency(
+    name = "layers-control",
+    version = "1.0.0",
+    src = c(file = system.file("htmlwidgets/styles", package = "mapgl")),
+    stylesheet = "layers-control.css"
+  )
+
+  widget <- htmlwidgets::createWidget(
+    name = "mapboxgl_compare",
+    x,
+    width = width,
+    height = height,
+    package = "mapgl",
+    dependencies = list(control_css),
+    elementId = if (is.null(shiny::getDefaultReactiveDomain())) {
+      elementId
+    } else {
+      NULL
+    },
+    sizingPolicy = htmlwidgets::sizingPolicy(
+      viewer.suppress = FALSE,
+      browser.fill = TRUE,
+      viewer.fill = TRUE,
+      knitr.figure = TRUE,
+      padding = 0,
+      knitr.defaultHeight = "500px",
+      viewer.defaultHeight = "100vh",
+      browser.defaultHeight = "100vh"
     )
-    
-    # Add class to enable S3 methods
-    class(widget) <- c("mapboxgl_compare", class(widget))
-    widget
+  )
+
+  # Add class to enable S3 methods
+  class(widget) <- c("mapboxgl_compare", class(widget))
+  widget
 }
 
 # Maplibre comparison widget
 compare.maplibre <- function(
-    map1,
-    map2,
-    width,
-    height,
-    elementId,
-    mousemove,
-    orientation,
-    mode,
-    swiper_color = NULL
+  map1,
+  map2,
+  width,
+  height,
+  elementId,
+  mousemove,
+  orientation,
+  mode,
+  swiper_color = NULL
 ) {
-    if (is.null(elementId)) {
-        elementId <- paste0(
-            "compare-container-",
-            as.hexmode(sample(1:1000000, 1))
-        )
-    }
-
-    # check_for_popups_or_tooltips <- function(map) {
-    #     if (!is.null(map$x$layers)) {
-    #         for (layer in map$x$layers) {
-    #             if (!is.null(layer$popup) || !is.null(layer$tooltip)) {
-    #                 return(TRUE)
-    #             }
-    #         }
-    #     }
-    #     return(FALSE)
-    # }
-    #
-    # if (
-    #     check_for_popups_or_tooltips(map1) || check_for_popups_or_tooltips(map2)
-    # ) {
-    #     rlang::warn(
-    #         "Popups and tooltips are not currently supported for `compare()` with maplibre maps."
-    #     )
-    # }
-
-    x <- list(
-        map1 = map1$x,
-        map2 = map2$x,
-        elementId = elementId,
-        mousemove = mousemove,
-        orientation = orientation,
-        mode = mode,
-        swiper_color = swiper_color
+  if (is.null(elementId)) {
+    elementId <- paste0(
+      "compare-container-",
+      as.hexmode(sample(1:1000000, 1))
     )
+  }
 
-    control_css <- htmltools::htmlDependency(
-        name = "layers-control",
-        version = "1.0.0",
-        src = c(file = system.file("htmlwidgets/styles", package = "mapgl")),
-        stylesheet = "layers-control.css"
-    )
+  # check_for_popups_or_tooltips <- function(map) {
+  #     if (!is.null(map$x$layers)) {
+  #         for (layer in map$x$layers) {
+  #             if (!is.null(layer$popup) || !is.null(layer$tooltip)) {
+  #                 return(TRUE)
+  #             }
+  #         }
+  #     }
+  #     return(FALSE)
+  # }
+  #
+  # if (
+  #     check_for_popups_or_tooltips(map1) || check_for_popups_or_tooltips(map2)
+  # ) {
+  #     rlang::warn(
+  #         "Popups and tooltips are not currently supported for `compare()` with maplibre maps."
+  #     )
+  # }
 
-    widget <- htmlwidgets::createWidget(
-        name = "maplibregl_compare",
-        x,
-        width = width,
-        height = height,
-        package = "mapgl",
-        dependencies = list(control_css),
-        elementId = if (is.null(shiny::getDefaultReactiveDomain()))
-            elementId else NULL,
-        sizingPolicy = htmlwidgets::sizingPolicy(
-            viewer.suppress = FALSE,
-            browser.fill = TRUE,
-            viewer.fill = TRUE,
-            knitr.figure = TRUE,
-            padding = 0,
-            knitr.defaultHeight = "500px",
-            viewer.defaultHeight = "100vh",
-            browser.defaultHeight = "100vh"
-        )
+  x <- list(
+    map1 = map1$x,
+    map2 = map2$x,
+    elementId = elementId,
+    mousemove = mousemove,
+    orientation = orientation,
+    mode = mode,
+    swiper_color = swiper_color
+  )
+
+  control_css <- htmltools::htmlDependency(
+    name = "layers-control",
+    version = "1.0.0",
+    src = c(file = system.file("htmlwidgets/styles", package = "mapgl")),
+    stylesheet = "layers-control.css"
+  )
+
+  widget <- htmlwidgets::createWidget(
+    name = "maplibregl_compare",
+    x,
+    width = width,
+    height = height,
+    package = "mapgl",
+    dependencies = list(control_css),
+    elementId = if (is.null(shiny::getDefaultReactiveDomain())) {
+      elementId
+    } else {
+      NULL
+    },
+    sizingPolicy = htmlwidgets::sizingPolicy(
+      viewer.suppress = FALSE,
+      browser.fill = TRUE,
+      viewer.fill = TRUE,
+      knitr.figure = TRUE,
+      padding = 0,
+      knitr.defaultHeight = "500px",
+      viewer.defaultHeight = "100vh",
+      browser.defaultHeight = "100vh"
     )
-    
-    # Add class to enable S3 methods
-    class(widget) <- c("maplibregl_compare", class(widget))
-    widget
+  )
+
+  # Add class to enable S3 methods
+  class(widget) <- c("maplibregl_compare", class(widget))
+  widget
 }
 
 #' Create a Mapbox GL Compare output element for Shiny
@@ -298,13 +304,13 @@ compare.maplibre <- function(
 #' @return A Mapbox GL Compare output element for use in a Shiny UI
 #' @export
 mapboxglCompareOutput <- function(outputId, width = "100%", height = "400px") {
-    htmlwidgets::shinyWidgetOutput(
-        outputId,
-        "mapboxgl_compare",
-        width,
-        height,
-        package = "mapgl"
-    )
+  htmlwidgets::shinyWidgetOutput(
+    outputId,
+    "mapboxgl_compare",
+    width,
+    height,
+    package = "mapgl"
+  )
 }
 
 #' Render a Mapbox GL Compare output element in Shiny
@@ -316,15 +322,15 @@ mapboxglCompareOutput <- function(outputId, width = "100%", height = "400px") {
 #' @return A rendered Mapbox GL Compare map for use in a Shiny server
 #' @export
 renderMapboxglCompare <- function(expr, env = parent.frame(), quoted = FALSE) {
-    if (!quoted) {
-        expr <- substitute(expr)
-    } # force quoted
-    htmlwidgets::shinyRenderWidget(
-        expr,
-        mapboxglCompareOutput,
-        env,
-        quoted = TRUE
-    )
+  if (!quoted) {
+    expr <- substitute(expr)
+  } # force quoted
+  htmlwidgets::shinyRenderWidget(
+    expr,
+    mapboxglCompareOutput,
+    env,
+    quoted = TRUE
+  )
 }
 
 #' Create a Maplibre GL Compare output element for Shiny
@@ -336,13 +342,13 @@ renderMapboxglCompare <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @return A Maplibre GL Compare output element for use in a Shiny UI
 #' @export
 maplibreCompareOutput <- function(outputId, width = "100%", height = "400px") {
-    htmlwidgets::shinyWidgetOutput(
-        outputId,
-        "maplibregl_compare",
-        width,
-        height,
-        package = "mapgl"
-    )
+  htmlwidgets::shinyWidgetOutput(
+    outputId,
+    "maplibregl_compare",
+    width,
+    height,
+    package = "mapgl"
+  )
 }
 
 #' Render a Maplibre GL Compare output element in Shiny
@@ -354,15 +360,15 @@ maplibreCompareOutput <- function(outputId, width = "100%", height = "400px") {
 #' @return A rendered Maplibre GL Compare map for use in a Shiny server
 #' @export
 renderMaplibreCompare <- function(expr, env = parent.frame(), quoted = FALSE) {
-    if (!quoted) {
-        expr <- substitute(expr)
-    } # force quoted
-    htmlwidgets::shinyRenderWidget(
-        expr,
-        maplibreCompareOutput,
-        env,
-        quoted = TRUE
-    )
+  if (!quoted) {
+    expr <- substitute(expr)
+  } # force quoted
+  htmlwidgets::shinyRenderWidget(
+    expr,
+    maplibreCompareOutput,
+    env,
+    quoted = TRUE
+  )
 }
 
 #' Create a proxy object for a Mapbox GL Compare widget in Shiny
@@ -376,27 +382,27 @@ renderMaplibreCompare <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @return A proxy object for the Mapbox GL Compare widget.
 #' @export
 mapboxgl_compare_proxy <- function(
-    compareId,
-    session = shiny::getDefaultReactiveDomain(),
-    map_side = "before"
+  compareId,
+  session = shiny::getDefaultReactiveDomain(),
+  map_side = "before"
 ) {
-    if (is.null(session)) {
-        stop(
-            "mapboxgl_compare_proxy must be called from within a Shiny session"
-        )
-    }
+  if (is.null(session)) {
+    stop(
+      "mapboxgl_compare_proxy must be called from within a Shiny session"
+    )
+  }
 
-    if (
-        !is.null(session$ns) &&
-            nzchar(session$ns(NULL)) &&
-            substring(compareId, 1, nchar(session$ns(""))) != session$ns("")
-    ) {
-        compareId <- session$ns(compareId)
-    }
+  if (
+    !is.null(session$ns) &&
+      nzchar(session$ns(NULL)) &&
+      substring(compareId, 1, nchar(session$ns(""))) != session$ns("")
+  ) {
+    compareId <- session$ns(compareId)
+  }
 
-    proxy <- list(id = compareId, session = session, map_side = map_side)
-    class(proxy) <- c("mapboxgl_compare_proxy", "mapboxgl_proxy")
-    proxy
+  proxy <- list(id = compareId, session = session, map_side = map_side)
+  class(proxy) <- c("mapboxgl_compare_proxy", "mapboxgl_proxy")
+  proxy
 }
 
 #' Create a proxy object for a Maplibre GL Compare widget in Shiny
@@ -410,27 +416,27 @@ mapboxgl_compare_proxy <- function(
 #' @return A proxy object for the Maplibre GL Compare widget.
 #' @export
 maplibre_compare_proxy <- function(
-    compareId,
-    session = shiny::getDefaultReactiveDomain(),
-    map_side = "before"
+  compareId,
+  session = shiny::getDefaultReactiveDomain(),
+  map_side = "before"
 ) {
-    if (is.null(session)) {
-        stop(
-            "maplibre_compare_proxy must be called from within a Shiny session"
-        )
-    }
+  if (is.null(session)) {
+    stop(
+      "maplibre_compare_proxy must be called from within a Shiny session"
+    )
+  }
 
-    if (
-        !is.null(session$ns) &&
-            nzchar(session$ns(NULL)) &&
-            substring(compareId, 1, nchar(session$ns(""))) != session$ns("")
-    ) {
-        compareId <- session$ns(compareId)
-    }
+  if (
+    !is.null(session$ns) &&
+      nzchar(session$ns(NULL)) &&
+      substring(compareId, 1, nchar(session$ns(""))) != session$ns("")
+  ) {
+    compareId <- session$ns(compareId)
+  }
 
-    proxy <- list(id = compareId, session = session, map_side = map_side)
-    class(proxy) <- c("maplibre_compare_proxy", "maplibre_proxy")
-    proxy
+  proxy <- list(id = compareId, session = session, map_side = map_side)
+  class(proxy) <- c("maplibre_compare_proxy", "maplibre_proxy")
+  proxy
 }
 
 #' Add a Globe Minimap to a map
@@ -459,69 +465,75 @@ maplibre_compare_proxy <- function(
 #'     add_globe_minimap()
 #' }
 add_globe_minimap <- function(
-    map,
-    position = "bottom-right",
-    globe_size = 82,
-    land_color = "white",
-    water_color = "rgba(30 40 70/60%)",
-    marker_color = "#ff2233",
-    marker_size = 1
+  map,
+  position = "bottom-right",
+  globe_size = 82,
+  land_color = "white",
+  water_color = "rgba(30 40 70/60%)",
+  marker_color = "#ff2233",
+  marker_size = 1
 ) {
-    map$x$globe_minimap <- list(
-        enabled = TRUE,
-        position = position,
-        globe_size = globe_size,
-        land_color = land_color,
-        water_color = water_color,
-        marker_color = marker_color,
-        marker_size = marker_size
-    )
+  map$x$globe_minimap <- list(
+    enabled = TRUE,
+    position = position,
+    globe_size = globe_size,
+    land_color = land_color,
+    water_color = water_color,
+    marker_color = marker_color,
+    marker_size = marker_size
+  )
 
-    if (inherits(map, "mapboxgl_proxy") || inherits(map, "maplibre_proxy")) {
-        if (
-            inherits(map, "mapboxgl_compare_proxy") ||
-                inherits(map, "maplibre_compare_proxy")
-        ) {
-            # For compare proxies
-            proxy_class <- if (inherits(map, "mapboxgl_compare_proxy"))
-                "mapboxgl-compare-proxy" else "maplibre-compare-proxy"
-            map$session$sendCustomMessage(
-                proxy_class,
-                list(
-                    id = map$id,
-                    message = list(
-                        type = "add_globe_minimap",
-                        position = position,
-                        globe_size = globe_size,
-                        land_color = land_color,
-                        water_color = water_color,
-                        marker_color = marker_color,
-                        marker_size = marker_size,
-                        map = map$map_side
-                    )
-                )
-            )
-        } else {
-            # For regular proxies
-            proxy_class <- if (inherits(map, "mapboxgl_proxy"))
-                "mapboxgl-proxy" else "maplibre-proxy"
-            map$session$sendCustomMessage(
-                proxy_class,
-                list(
-                    id = map$id,
-                    message = list(
-                        type = "add_globe_minimap",
-                        position = position,
-                        globe_size = globe_size,
-                        land_color = land_color,
-                        water_color = water_color,
-                        marker_color = marker_color,
-                        marker_size = marker_size
-                    )
-                )
-            )
-        }
+  if (inherits(map, "mapboxgl_proxy") || inherits(map, "maplibre_proxy")) {
+    if (
+      inherits(map, "mapboxgl_compare_proxy") ||
+        inherits(map, "maplibre_compare_proxy")
+    ) {
+      # For compare proxies
+      proxy_class <- if (inherits(map, "mapboxgl_compare_proxy")) {
+        "mapboxgl-compare-proxy"
+      } else {
+        "maplibre-compare-proxy"
+      }
+      map$session$sendCustomMessage(
+        proxy_class,
+        list(
+          id = map$id,
+          message = list(
+            type = "add_globe_minimap",
+            position = position,
+            globe_size = globe_size,
+            land_color = land_color,
+            water_color = water_color,
+            marker_color = marker_color,
+            marker_size = marker_size,
+            map = map$map_side
+          )
+        )
+      )
+    } else {
+      # For regular proxies
+      proxy_class <- if (inherits(map, "mapboxgl_proxy")) {
+        "mapboxgl-proxy"
+      } else {
+        "maplibre-proxy"
+      }
+      map$session$sendCustomMessage(
+        proxy_class,
+        list(
+          id = map$id,
+          message = list(
+            type = "add_globe_minimap",
+            position = position,
+            globe_size = globe_size,
+            land_color = land_color,
+            water_color = water_color,
+            marker_color = marker_color,
+            marker_size = marker_size
+          )
+        )
+      )
     }
+  }
 
-    map
+  map
 }
